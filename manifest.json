@@ -1,0 +1,24 @@
+{
+  "manifest_version": 3,
+  "name": "Lab Report AutoFill",
+  "version": "1.0",
+  "description": "Automatically parses PDF lab reports and fills out the data on the active webpage.",
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Open AutoFill"
+  },
+  "permissions": [
+    "activeTab",
+    "scripting",
+    "storage"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"]
+    }
+  ]
+}

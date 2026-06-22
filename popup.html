@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="popup.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Lab AutoFill</h1>
+            <p>Upload a PDF to parse and fill</p>
+        </div>
+
+        <!-- New State: Show when PDF is already in memory -->
+        <div id="memory-state" style="display: none; text-align: center; margin-bottom: 20px;">
+            <div style="font-size: 13px; color: #4b5563; margin-bottom: 12px; background: #e0e7ff; padding: 8px; border-radius: 6px; border: 1px solid #c7d2fe;">
+                Loaded PDF: <strong id="memory-file-name" style="color: #4338ca;"></strong>
+            </div>
+            <button id="clear-btn" style="background: white; border: 1px solid #d1d5db; color: #4b5563; padding: 6px 12px; border-radius: 6px; font-size: 12px; cursor: pointer; transition: all 0.2s; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">
+                Clear & Upload Different PDF
+            </button>
+        </div>
+
+        <div class="upload-area">
+            <input type="file" id="pdf-upload" accept="application/pdf" />
+            <label for="pdf-upload" class="upload-btn">Choose PDF File</label>
+            <div id="file-name" class="file-name">No file chosen</div>
+        </div>
+
+        <button id="start-btn" class="primary-btn disabled" disabled>Start Autofill</button>
+        
+        <div id="status" class="status"></div>
+    </div>
+
+    <!-- Load pdf.js -->
+    <script src="pdf.min.js"></script>
+    <script src="pdf.worker.min.js"></script>
+    <script>
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'pdf.worker.min.js';
+    </script>
+    
+    <script src="extractor.js"></script>
+    <script src="popup.js"></script>
+</body>
+</html>
