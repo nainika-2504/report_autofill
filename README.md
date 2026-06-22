@@ -1,12 +1,14 @@
-# Lab Report AutoFill Browser Extension
+# Lab Report AutoFill for B2B Data Entry
 
-A powerful, dynamic browser extension designed to automate the manual entry of lab report data. Simply upload a PDF lab report, and the extension will magically read the website you are on, find the corresponding medical values inside the PDF, and fill out the forms for you.
+A powerful, dynamic browser extension designed to drastically reduce manual data entry for B2B lab operations. Built specifically for high-volume environments where lab reports from external facilities must be quickly and accurately entered into internal web portals.
+
+Simply upload a PDF lab report, and the extension will magically read the website you are on, find the corresponding medical values inside the PDF, and fill out the forms for you.
 
 ##  Key Features
 
-- **Dynamic "Screen-Driven" Extraction:** The extension never "blindly" enters values. It intelligently reads the test labels currently visible on your website (e.g., "Total Bilirubin", "Estimated Average Glucose") and hunts the PDF for those exact tests. This means it works with **any** lab report format and **any** website without needing code changes!
-- **Smart Medical Synonyms:** Built-in medical synonym mapping. If your website asks for "HbA1c" but the PDF says "Glycosylated Hemoglobin", the extension knows they are the same thing and maps the data perfectly.
-- **Cross-Tab Memory:** The extension securely saves the parsed PDF into your browser's local storage. You can upload the PDF once, fill out the Lipid Profile tab, hit Save, navigate to the Kidney Profile tab, and autofill again without ever having to re-upload the PDF!
+- **Dynamic "Screen-Driven" Extraction:** The extension never "blindly" enters values. It intelligently reads the test labels currently visible on your internal portal (e.g., "Total Bilirubin", "Estimated Average Glucose") and hunts the external PDF for those exact tests. This means it works with **any** external lab report format and **any** internal website without needing code changes!
+- **Smart Medical Synonyms:** Built-in medical synonym mapping. If your portal asks for "HbA1c" but the external PDF says "Glycosylated Hemoglobin", the extension knows they are the same thing and maps the data perfectly.
+- **Cross-Tab Memory:** The extension securely saves the parsed PDF into your browser's local storage. You can upload the PDF once, fill out the Lipid Profile tab, hit Save, navigate to the Kidney Profile tab, and autofill again without ever having to re-upload the PDF! Ideal for multi-page web applications.
 - **Auto-Formatting:** Automatically cleans up messy PDF extractions, removing weird spaces and keeping important decimal points and commas (e.g., `10,270`).
 
 ##  Installation Guide
@@ -25,12 +27,12 @@ Since this is a custom extension, you will load it into your browser in "Develop
 
 ##  How to Use
 
-1. Navigate to the page or tab on your website where you want to enter lab results.
+1. Navigate to the page or tab on your B2B web portal where you want to enter lab results.
 2. Click the **Lab AutoFill** extension icon in your browser toolbar.
-3. Click **Choose PDF File** and select the patient's lab report.
+3. Click **Choose PDF File** and select the external lab report.
 4. Click **Start Autofill**.
 5. Watch as the form fields populate instantly! 
-6. Switch to a new tab on your website (e.g., from LFT to CBP), open the extension again, and click **Start Autofill**—the PDF is already saved in memory!
+6. Switch to a new tab on your portal (e.g., from LFT to CBP), open the extension again, and click **Start Autofill**—the PDF is already saved in memory!
 
 ##  Architecture
 
