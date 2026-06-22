@@ -2,14 +2,14 @@
 
 A powerful, dynamic browser extension designed to automate the manual entry of lab report data. Simply upload a PDF lab report, and the extension will magically read the website you are on, find the corresponding medical values inside the PDF, and fill out the forms for you.
 
-## ✨ Key Features
+##  Key Features
 
 - **Dynamic "Screen-Driven" Extraction:** The extension never "blindly" enters values. It intelligently reads the test labels currently visible on your website (e.g., "Total Bilirubin", "Estimated Average Glucose") and hunts the PDF for those exact tests. This means it works with **any** lab report format and **any** website without needing code changes!
 - **Smart Medical Synonyms:** Built-in medical synonym mapping. If your website asks for "HbA1c" but the PDF says "Glycosylated Hemoglobin", the extension knows they are the same thing and maps the data perfectly.
 - **Cross-Tab Memory:** The extension securely saves the parsed PDF into your browser's local storage. You can upload the PDF once, fill out the Lipid Profile tab, hit Save, navigate to the Kidney Profile tab, and autofill again without ever having to re-upload the PDF!
 - **Auto-Formatting:** Automatically cleans up messy PDF extractions, removing weird spaces and keeping important decimal points and commas (e.g., `10,270`).
 
-## 🚀 Installation Guide
+##  Installation Guide
 
 Since this is a custom extension, you will load it into your browser in "Developer Mode":
 
@@ -23,7 +23,7 @@ Since this is a custom extension, you will load it into your browser in "Develop
 6. Select the `lab-autofill` folder that contains this code.
 7. The extension icon will now appear in your browser toolbar! (You may want to pin it for easy access).
 
-## 💡 How to Use
+##  How to Use
 
 1. Navigate to the page or tab on your website where you want to enter lab results.
 2. Click the **Lab AutoFill** extension icon in your browser toolbar.
@@ -32,7 +32,7 @@ Since this is a custom extension, you will load it into your browser in "Develop
 5. Watch as the form fields populate instantly! 
 6. Switch to a new tab on your website (e.g., from LFT to CBP), open the extension again, and click **Start Autofill**—the PDF is already saved in memory!
 
-## 🛠️ Architecture
+##  Architecture
 
 - `manifest.json`: Configuration for Manifest V3.
 - `popup.html` / `popup.css` / `popup.js`: The UI and file parsing logic. Uses `pdf.js` to extract raw text and saves it to local memory.
