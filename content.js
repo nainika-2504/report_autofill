@@ -117,7 +117,7 @@ async function runDynamicAutofill(pdfText, silent = false) {
             ];
 
             for (const aliasGroup of commonAliases) {
-                if (aliasGroup.some(alias => cleanLabelLower.includes(alias))) {
+                if (aliasGroup.some(alias => isAliasMatch(cleanLabelLower, alias))) {
                     for (const alias of aliasGroup) {
                         const safeAlias = alias.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
                         const regexAlias = new RegExp(safeAlias + '[^0-9a-z]*?([0-9]+(?:[,.][0-9]+)?)', 'i');
@@ -339,3 +339,17 @@ function startAutofillMonitor() {
 
 // Start monitoring the page automatically
 startAutofillMonitor();
+
+// Helper to check if a cleanLabel matches an alias while protecting against substring conflicts
+function isAliasMatch(cleanLabelLower, alias) {
+    if (!cleanLabelLower.includes(alias)) return false;
+    
+    // Prefix guards to prevent substring matches (e.g. "unconjugated" incorrectly matching "conjugated")
+    if (alias === 'direct bilirubin' && cleanLabelLower.includes('indirect bilirubin')) return false;
+    if (alias === 'conjugated' && cleanLabelLower.includes('unconjugated')) return false;
+    if (alias === 'ldl' && cleanLabelLower.includes('vldl')) return false;
+    if (alias === 'cholesterol-ldl' && cleanLabelLower.includes('cholesterol-vldl')) return false;
+    if (alias === 'l d l' && cleanLabelLower.includes('v l d l')) return false;
+    
+    return true;
+}
