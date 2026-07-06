@@ -23,7 +23,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // ── 2. Clear memory ────────────────────────────────────────────────────
     clearBtn.addEventListener('click', () => {
-        chrome.storage.local.remove(['savedPdfText', 'savedPdfName'], () => {
+        chrome.storage.local.remove(['savedPdfText', 'savedPdfName', 'sessionPdfText', 'sessionPatientInfo'], () => {
             pdfTextToInject = null;
             showUploadArea();
             disableStartBtn();
@@ -93,21 +93,37 @@ document.addEventListener('DOMContentLoaded', () => {
             const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
             if (!tab) throw new Error('Could not find active tab.');
 
-            chrome.tabs.sendMessage(tab.id, { action: 'FILL_LAB_DATA', data: pdfTextToInject }, (response) => {
-                startBtn.disabled = false;
-                startBtn.textContent = 'Start Autofill';
+            const patientInfo = extractPatientInfo(pdfTextToInject);
+            console.log("Saving patient session for background refill:", patientInfo);
 
-                if (chrome.runtime.lastError) {
-                    setStatus('Error: Refresh the lab website and try again.', 'error');
-                    return;
-                }
+            // Save background session first
+            chrome.storage.local.set({
+                sessionPdfText: pdfTextToInject,
+                sessionPatientInfo: patientInfo
+            }, () => {
+                // Clear from the popup memory immediately so the UI is clean for the next patient
+                chrome.storage.local.remove(['savedPdfText', 'savedPdfName'], () => {
+                    // Trigger dynamic autofill on page
+                    chrome.tabs.sendMessage(tab.id, { action: 'FILL_LAB_DATA', data: pdfTextToInject }, (response) => {
+                        // Reset popup UI upload state, but leave results panel visible
+                        pdfTextToInject = null;
+                        showUploadArea();
+                        disableStartBtn();
+                        startBtn.textContent = 'Start Autofill';
 
-                if (response && response.status === 'success') {
-                    renderResults(response.details);
-                    setStatus('');
-                } else {
-                    setStatus('Error: ' + (response?.message || 'Unknown error'), 'error');
-                }
+                        if (chrome.runtime.lastError) {
+                            setStatus('Error: Refresh the lab website and try again.', 'error');
+                            return;
+                        }
+
+                        if (response && response.status === 'success') {
+                            renderResults(response.details);
+                            setStatus('Autofill successful! PDF cleared from popup.', 'success');
+                        } else {
+                            setStatus('Error: ' + (response?.message || 'Unknown error'), 'error');
+                        }
+                    });
+                });
             });
 
         } catch (err) {
@@ -117,6 +133,25 @@ document.addEventListener('DOMContentLoaded', () => {
             startBtn.textContent = 'Start Autofill';
         }
     });
+
+    // ── Helpers ────────────────────────────────────────────────────────────
+    function extractPatientInfo(text) {
+        let name = null;
+        const nameMatch = text.match(/Name\s*:\s*([^:\n]+)/i);
+        if (nameMatch) {
+            name = nameMatch[1].replace(/Barcode.*/i, '').trim();
+        }
+        
+        const barcodes = [];
+        const barcodeMatches = text.matchAll(/Barcode\s*No\s*:\s*(\d+)/gi);
+        for (const match of barcodeMatches) {
+            if (match[1] && !barcodes.includes(match[1])) {
+                barcodes.push(match[1]);
+            }
+        }
+        
+        return { name, barcodes };
+    }
 
     // ── Results Renderer ───────────────────────────────────────────────────
     function renderResults(details) {
@@ -190,7 +225,6 @@ document.addEventListener('DOMContentLoaded', () => {
         resultsPanel.style.display = '';
     }
 
-    // ── Helpers ────────────────────────────────────────────────────────────
     function showMemoryState(name) {
         uploadArea.style.display = 'none';
         memoryState.style.display = 'block';

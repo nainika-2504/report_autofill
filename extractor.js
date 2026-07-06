@@ -17,3 +17,8 @@ function normalizeText(text) {
 function extractLabData(rawText) {
     return normalizeText(rawText);
 }
+
+// Export for testing in Node.js
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = { extractLabData, normalizeText };
+}
