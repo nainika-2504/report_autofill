@@ -103,7 +103,9 @@ async function runDynamicAutofill(pdfText, silent = false) {
                 ['ldl', 'cholesterol-ldl', 'ldl cholesterol'],
                 ['hdl', 'cholesterol-hdl', 'hdl cholesterol'],
                 ['vldl', 'cholesterol-vldl', 'cholesterol vldl', 'vldl cholesterol'],
-                ['hb', 'hemoglobin']
+                ['hb', 'hemoglobin'],
+                ['direct bilirubin', 'conjugated', 'd. bilirubin', 'd.bilirubin'],
+                ['indirect bilirubin', 'unconjugated', 'i.d. bilirubin', 'i.d.bilirubin']
             ];
 
             for (const aliasGroup of commonAliases) {
