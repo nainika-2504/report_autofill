@@ -111,8 +111,10 @@ async function runDynamicAutofill(pdfText, silent = false) {
                 ['hdl', 'cholesterol-hdl', 'hdl cholesterol'],
                 ['vldl', 'cholesterol-vldl', 'cholesterol vldl', 'vldl cholesterol', 'cholesterol- v l d l', 'v l d l'],
                 ['hb', 'hemoglobin'],
-                ['direct bilirubin', 'conjugated', 'd. bilirubin', 'd.bilirubin'],
-                ['indirect bilirubin', 'unconjugated', 'i.d. bilirubin', 'i.d.bilirubin'],
+                // IMPORTANT: indirect/unconjugated must come BEFORE direct/conjugated
+                // so that "unconjugated" is tried first and doesn't fall through to "conjugated"
+                ['indirect bilirubin', 'unconjugated', 'i.d.bilirubin', 'i.d. bilirubin', 'id bilirubin'],
+                ['direct bilirubin', 'conjugated', 'd.bilirubin', 'd. bilirubin'],
                 ['albumin/globulin ratio', 'albumin / globulin ratio', 'a/g ratio', 'a / g ratio']
             ];
 
@@ -120,7 +122,8 @@ async function runDynamicAutofill(pdfText, silent = false) {
                 if (aliasGroup.some(alias => isAliasMatch(cleanLabelLower, alias))) {
                     for (const alias of aliasGroup) {
                         const safeAlias = alias.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
-                        const regexAlias = new RegExp(safeAlias + '[^0-9a-z]*?([0-9]+(?:[,.][0-9]+)?)', 'i');
+                        // Tight window: number must appear within 60 chars of alias name
+                        const regexAlias = new RegExp(safeAlias + '\\s{0,60}?([0-9]+(?:[,.][0-9]+)?)', 'i');
                         match = normalizedPdfText.match(regexAlias);
                         if (match) {
                             matchReason = `alternate name "${alias}"`;
@@ -342,14 +345,16 @@ startAutofillMonitor();
 
 // Helper to check if a cleanLabel matches an alias while protecting against substring conflicts
 function isAliasMatch(cleanLabelLower, alias) {
-    if (!cleanLabelLower.includes(alias)) return false;
+    const index = cleanLabelLower.indexOf(alias);
+    if (index === -1) return false;
     
-    // Prefix guards to prevent substring matches (e.g. "unconjugated" incorrectly matching "conjugated")
-    if (alias === 'direct bilirubin' && cleanLabelLower.includes('indirect bilirubin')) return false;
-    if (alias === 'conjugated' && cleanLabelLower.includes('unconjugated')) return false;
-    if (alias === 'ldl' && cleanLabelLower.includes('vldl')) return false;
-    if (alias === 'cholesterol-ldl' && cleanLabelLower.includes('cholesterol-vldl')) return false;
-    if (alias === 'l d l' && cleanLabelLower.includes('v l d l')) return false;
+    // Prefix guard: Check if the character before the match is a letter (e.g. 'v' in 'vldl', 'in' in 'indirect')
+    if (index > 0) {
+        const charBefore = cleanLabelLower[index - 1];
+        if (/[a-z]/i.test(charBefore)) {
+            return false;
+        }
+    }
     
     return true;
 }
