@@ -65,8 +65,15 @@ async function runDynamicAutofill(pdfText, silent = false) {
         
         if (cleanLabel.length < 2 || cleanLabel.length > 80) continue;
 
-        const cleanLabelLower = cleanLabel.toLowerCase();
-        const safeLabel = cleanLabelLower.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+        let cleanLabelLower = cleanLabel.toLowerCase();
+        // Clean spaces in spaced-out abbreviations like "l d l" -> "ldl" or "v l d l" -> "vldl"
+        cleanLabelLower = cleanLabelLower.replace(/(?<=\b[a-z])\s+(?=[a-z]\b)/gi, '');
+        // Clean spaces around slashes like "albumin / globulin" -> "albumin/globulin"
+        cleanLabelLower = cleanLabelLower.replace(/\s*\/\s*/g, '/');
+
+        const safeLabel = cleanLabelLower
+            .replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&')
+            .replace(/\\\//g, '\\s*\\/\\s*'); // allow optional spaces around slash
         
         // Mark as attempted so we don't evaluate it again
         field.setAttribute('data-autofill-attempted', 'true');
@@ -100,12 +107,13 @@ async function runDynamicAutofill(pdfText, silent = false) {
                 ['wbc', 'leucocyte', 'leukocyte', 'white blood cell', 'total leucocytes count'],
                 ['rbc', 'erythrocyte', 'red blood cell', 'erythrocyte count'],
                 ['hba1c', 'glycosylated hemoglobin', 'glycated hemoglobin'],
-                ['ldl', 'cholesterol-ldl', 'ldl cholesterol'],
+                ['ldl', 'cholesterol-ldl', 'ldl cholesterol', 'cholesterol-l d l', 'l d l'],
                 ['hdl', 'cholesterol-hdl', 'hdl cholesterol'],
-                ['vldl', 'cholesterol-vldl', 'cholesterol vldl', 'vldl cholesterol'],
+                ['vldl', 'cholesterol-vldl', 'cholesterol vldl', 'vldl cholesterol', 'cholesterol- v l d l', 'v l d l'],
                 ['hb', 'hemoglobin'],
                 ['direct bilirubin', 'conjugated', 'd. bilirubin', 'd.bilirubin'],
-                ['indirect bilirubin', 'unconjugated', 'i.d. bilirubin', 'i.d.bilirubin']
+                ['indirect bilirubin', 'unconjugated', 'i.d. bilirubin', 'i.d.bilirubin'],
+                ['albumin/globulin ratio', 'albumin / globulin ratio', 'a/g ratio', 'a / g ratio']
             ];
 
             for (const aliasGroup of commonAliases) {
