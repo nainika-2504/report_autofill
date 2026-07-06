@@ -115,15 +115,21 @@ async function runDynamicAutofill(pdfText, silent = false) {
                 // so that "unconjugated" is tried first and doesn't fall through to "conjugated"
                 ['indirect bilirubin', 'unconjugated', 'i.d.bilirubin', 'i.d. bilirubin', 'id bilirubin'],
                 ['direct bilirubin', 'conjugated', 'd.bilirubin', 'd. bilirubin'],
-                ['albumin/globulin ratio', 'albumin / globulin ratio', 'a/g ratio', 'a / g ratio']
+                ['albumin/globulin ratio', 'albumin / globulin ratio', 'a/g ratio', 'a / g ratio'],
+                // Thyroid: portal shows "Total Tri-Iodothyronine (T3)", PDF shows "Tri-Iodothyronine Total (TT3)"
+                // IMPORTANT: T4/TT4 must come BEFORE T3/TT3 to prevent T3 substring match inside T4
+                ['total thyroxine', 'thyroxine total', 't4', 'tt4'],
+                ['total tri-iodothyronine', 'tri-iodothyronine total', 'triiodothyronine total', 't3', 'tt3'],
+                // Kidney: portal shows "Serum Creatinine", PDF may show "Creatinine"
+                ['serum creatinine', 'creatinine']
             ];
 
             for (const aliasGroup of commonAliases) {
                 if (aliasGroup.some(alias => isAliasMatch(cleanLabelLower, alias))) {
                     for (const alias of aliasGroup) {
                         const safeAlias = alias.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
-                        // Tight window: number must appear within 60 chars of alias name
-                        const regexAlias = new RegExp(safeAlias + '\\s{0,60}?([0-9]+(?:[,.][0-9]+)?)', 'i');
+                        // Skip parenthetical annotations (e.g. "(TT3)") before capturing the number
+                        const regexAlias = new RegExp(safeAlias + '(?:\\s*\\([^)]*\\))*\\s*([0-9]+(?:[,.][0-9]+)?)', 'i');
                         match = normalizedPdfText.match(regexAlias);
                         if (match) {
                             matchReason = `alternate name "${alias}"`;
